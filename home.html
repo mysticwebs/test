@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Status Page</title>
+</head>
+<body>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+}
+
+#status {
+    padding: 20px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+    </style>
+
+<div id="status">Loading...</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const statusElement = document.getElementById("status");
+
+    // Function to update status
+    function updateStatus(status) {
+        statusElement.textContent = status;
+    }
+
+    // Function to set online status
+    function setOnlineStatus() {
+        updateStatus("ONLINE");
+        // Save online status to localStorage
+        localStorage.setItem("onlineStatus", "ONLINE");
+    }
+
+    // Function to set offline status
+    function setOfflineStatus() {
+        const offlineSince = new Date();
+        updateStatus(`OFFLINE since ${offlineSince.toLocaleTimeString()}`);
+        // Save offline status to localStorage
+        localStorage.setItem("onlineStatus", `OFFLINE since ${offlineSince.toLocaleTimeString()}`);
+    }
+
+    // Event listeners for user interactions
+    window.addEventListener("focus", function () {
+        setOnlineStatus();
+        // Broadcast online status to other tabs/pages
+        localStorage.setItem("broadcastStatus", "ONLINE");
+    });
+
+    window.addEventListener("blur", function () {
+        setOfflineStatus();
+        // Broadcast offline status to other tabs/pages
+        localStorage.setItem("broadcastStatus", "OFFLINE");
+    });
+
+    // Listen for changes in localStorage from other tabs/pages
+    window.addEventListener("storage", function (event) {
+        if (event.key === "broadcastStatus") {
+            updateStatus(event.newValue);
+        }
+    });
+
+    // Initial status check
+    const storedStatus = localStorage.getItem("onlineStatus");
+    if (document.hasFocus()) {
+        setOnlineStatus();
+    } else if (storedStatus) {
+        updateStatus(storedStatus);
+    } else {
+        setOfflineStatus();
+    }
+});
+
+</script>
+</body>
+</html>
